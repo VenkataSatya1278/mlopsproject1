@@ -3,25 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "prefix": {
-      "value": "<your prefix>"
+      "value": "demo"
     },
     "postfix": {
-      "value": "<your postfix>"
+      "value": "mlops"
     },
     "env": {
-      "value": "<prod/dev/test>"
-    },
-    "githubOrgOrUser": {
-      "value": "<the github user>"
-    },
-    "githubRepo": {
-      "value": "<the forked repository name>"
-    },
-    "githubBranch": {
-      "value": "main"
-    },
-    "defaultAudience": {
-      "value": "api://AzureADTokenExchange"
+      "value": "test"
+    
     }
   }
 }

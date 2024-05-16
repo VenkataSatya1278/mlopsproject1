@@ -1,6 +1,5 @@
 # mlops-v2
 
-> This repository was "forked" from this solution [accelerator](https://github.com/Azure/mlops-v2).
 
 Thinking about MLOps? This repo is a good starting point to get you started with MLOps. The first step is to understand the moving parts of MLOps.
 The approach currently leverages few key areas:
