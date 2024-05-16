@@ -4,7 +4,7 @@ param tags object
 
 // Storage Account
 resource stoacct 'Microsoft.Storage/storageAccounts@2019-04-01' = {
-  name: 'st${baseName}'
+  name: baseName
   location: location
   sku: {
     name: 'Standard_LRS'

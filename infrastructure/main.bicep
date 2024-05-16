@@ -1,20 +1,9 @@
-targetScope = 'subscription'
+//targetScope = 'subscription'
 
-param location string = deployment().location
+param location string = resourceGroup().location
 param prefix string
 param postfix string
 param env string 
-
-@description('The GitHub user or organization name')
-param githubOrgOrUser string
-
-@description('The GitHub repo name')
-param githubRepo string
-
-@description('The GitHub repository\'s branch name')
-param githubBranch string = 'main'
-
-param defaultAudience string = 'api://AzureADTokenExchange'
 
 param tags object = {
   Owner: 'mlops-v2'
@@ -24,24 +13,18 @@ param tags object = {
   Name: prefix
 }
 
-var github = {
-  issuer: 'https://token.actions.githubusercontent.com'
-  subject: 'repo:${githubOrgOrUser}/${githubRepo}:ref:refs/heads/${githubBranch}'
-  audience: defaultAudience
-}
-
 module uami 'modules/uami.bicep' = {
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   name: uamiName
   params: {
-    github: github
+    //github: github
     uamiName: uamiName
     location: location
   }
 }
 
 module roleAssignmentModule 'modules/role_assignment.bicep' = {
-  scope: resourceGroup(rg.name) // Set the scope to the target resource group
+  scope: resourceGroup() // Set the scope to the target resource group
   name: 'roleAssignment'
   params: {
     contributerId: 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -52,29 +35,30 @@ module roleAssignmentModule 'modules/role_assignment.bicep' = {
 
 
 var baseName  = '${prefix}-${postfix}${env}'
-var resourceGroupName = 'rg-${baseName}'
+//var resourceGroupName = 'rg-${baseName}'
 var uamiName = 'uami-${baseName}'
 
-resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
+/*resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
   location: location
 
-  tags: tags
-}
+  tags: 
+  
+}*/
 
 // Storage Account
 module st './modules/storage_account.bicep' = {
   name: 'st'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
-    baseName: '${uniqueString(rg.id)}${env}'
+    baseName: 'st${uniqueString(resourceGroup().id)}${env}'
     location: location
     tags: tags
   }
 }
 
 // Key Vault
-module kv './modules/key_vault.bicep' = {
+/*module kv './modules/key_vault.bicep' = {
   name: 'kv'
   scope: resourceGroup(rg.name)
   params: {
@@ -129,4 +113,4 @@ module mlwcc './modules/aml_computecluster.bicep' = {
     location: location
     workspaceName: mlw.outputs.amlsName
   }
-}
+}*/
