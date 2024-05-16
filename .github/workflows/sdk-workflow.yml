@@ -1,0 +1,121 @@
+name: SDK (sample) - Workflow
+
+
+on: 
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Resource group name'
+        required: true
+        default: 'rg-yo5-d23dev'        
+      aml_workspace:
+        description: 'AML workspace name'
+        required: true
+        default: 'mlw-yo5-d23dev'
+      environment_file:
+        description: 'Environment file'
+        required: true
+        default: './data-science/models/bp/environment/dependencies.yml'
+      env_name:
+        description: 'Environment name'
+        required: true
+        default: 'bp-train-env'
+      cluster_tier:
+          description: 'Cluster tier (dedicated or lowpriority)'
+          required: true
+          default: 'Dedicated'
+      cluster_name:
+            description: 'Cluster name'
+            required: true
+            default: 'bp-train-cluster'
+      data_asset_name:
+            description: 'Data Asset Name'
+            required: true
+            default: 'bp_training_data'
+      data_type:
+            description: 'Data type (uri_file or tabular)'
+            required: true
+            default: 'uri_folder'
+      data_path:
+            description: 'Path to Data'
+            required: true
+            default: './data/bp/<somedata>'
+  
+  repository_dispatch:
+    types: [trigger_model_train]        
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  build_type : 'conda'
+  base_image: 'mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest'
+  env_description: 'environment-for-training'
+  ds_description: 'dataset-for-training'
+  max_instances: '4'
+  min_instances: '0'
+  vm_size: 'STANDARD_DS3_V2'
+
+jobs:
+  WorkflowRun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: AZ Login
+        uses: azure/login@v1
+        with:
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION }}
+          audience: api://AzureADTokenExchange
+          # creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Install az ml
+      #   run: |
+      #     az extension add -n ml
+      #     az extension update --name ml
+      #   shell: bash
+      - name: Set up Python
+        run: |
+          pip install -r mlops/azureml/activities/requirements.txt
+        shell: bash
+      - name: Create environment(image) for training
+        run: |
+          python mlops/azureml/activities/register_environment.py \
+          --environment_name ${{ inputs.env_name }} \
+          --description ${{ env.env_description }} \
+          --env_path ${{ inputs.environment_file }} \
+          --resource_group ${{ inputs.resource_group }} \
+          --build_type ${{ env.build_type }} \
+          --subscription_id ${{ secrets.AZURE_SUBSCRIPTION }} \
+          --workspace_name ${{ inputs.aml_workspace }} \
+          --base_image ${{ env.base_image }}
+        shell: bash
+      - name: Register dataset
+        run: |
+          python mlops/azureml/activities/register_data_asset.py \
+          --data_name ${{ inputs.data_asset_name }} \
+          --description ${{ env.ds_description }} \
+          --data_type ${{ inputs.data_type }} \
+          --data_path ${{ inputs.data_path }} \
+          --resource_group ${{ inputs.resource_group }} \
+          --subscription_id ${{ secrets.AZURE_SUBSCRIPTION }} \
+          --workspace_name ${{ inputs.aml_workspace }} \
+
+        shell: bash
+      - name: Create compute cluster
+        run: |
+          python mlops/azureml/activities/create_compute.py \
+          --cluster_tier ${{ inputs.cluster_tier }} \
+          --max_instances ${{ env.max_instances }} \
+          --min_instances ${{ env.min_instances }} \
+          --size ${{ env.vm_size }} \
+          --cluster_name ${{ inputs.cluster_name }} \
+          --resource_group ${{ inputs.resource_group }} \
+          --subscription_id ${{ secrets.AZURE_SUBSCRIPTION }} \
+          --workspace_name ${{ inputs.aml_workspace }} \
+
+        shell: bash
+
+

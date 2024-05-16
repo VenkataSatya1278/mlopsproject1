@@ -1,0 +1,55 @@
+---
+
+# This is a workflow for Connecting to an AML Workspace
+name: Connect to Workspace
+
+inputs:
+  resource_group:
+    description: 'Resource Group'     
+    required: true
+    type: string
+  workspace_name:
+    description: 'Workspace Name'     
+    required: true
+    type: string
+  azure_tenant_id:
+    description: 'Azure tenant ID'
+    type: string
+    required: true
+  azure_client_id:
+    description: 'User Assigned - client ID'
+    type: string
+    required: true
+  azure_subscription:
+    description: 'Azure subscription ID'
+    type: string
+    required: true
+  audience:
+    description: 'Audience for the Azure Machine Learning online endpoint'
+    type: string
+    required: true
+
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Az CLI login
+      uses: azure/login@v1
+      with:
+          tenant-id: ${{ inputs.azure_tenant_id }}
+          client-id: ${{ inputs.azure_client_id }}
+          subscription-id: ${{ inputs.azure_subscription }}
+          audience: ${{ inputs.audience }}
+    - name: install-extension
+      run: |
+        az extension add -n ml -y
+      shell: bash
+    - name: update-extension
+      run: |
+        az extension update -n ml
+      shell: bash
+    - name: connect-to-workspace
+      run: |
+        az configure --defaults group=${{inputs.resourceGroup}} workspace=${{inputs.workspace}}
+      shell: bash

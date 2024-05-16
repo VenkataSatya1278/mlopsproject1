@@ -1,0 +1,105 @@
+name: deploy-online-endpoint-pipeline
+
+on: 
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Resource group name'
+        required: true
+        default: 'rg-yo5-d23dev'
+      aml_workspace:
+        description: 'AML workspace name'
+        required: true
+        default: 'mlw-yo5-d23dev'
+      deployment_file:
+        description: 'Deployment file'
+        required: true
+        default: 'mlops/azureml/deploy/online/model1-online-deployment.yml'
+      endpoint_file:
+        description: 'Endpoint file'
+        required: true
+        default: 'mlops/azureml/deploy/online/model1-online-endpoint.yml'
+      endpoint_name:
+        description: 'Endpoint name'
+        required: true
+        default: 'taxi-gha-online'
+      traffic_percentile:
+        description: 'Traffic percentile'
+        required: true
+        default: '100'
+      deployment_name:
+        description: 'Deployment name'
+        required: true
+        default: 'taxi-gha-online'
+  repository_dispatch:
+    types: [trigger_online_endpoint]  
+env:
+  endpoint_type: 'online-endpoint'
+  deployment_type: 'online-deployment'
+  audience: api://AzureADTokenExchange
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+
+  create-endpoint:
+    runs-on: ubuntu-latest    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2      
+      - name: Create Endpoint
+        uses: ./.github/actions/create-endpoint
+        with:
+          endpoint_file: ${{ inputs.endpoint_file }}          
+          resource_group: ${{ inputs.resource_group }}
+          workspace_name: ${{ inputs.aml_workspace }}
+          endpoint_name: ${{ inputs.endpoint_name }}          
+          endpoint_type: $endpoint_type
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_subscription: ${{ secrets.AZURE_SUBSCRIPTION }}  
+          audience: ${{ env.audience }}
+          # creds: ${{ secrets.AZURE_CREDENTIALS }}
+  create-deployment:
+    runs-on: ubuntu-latest
+    needs: create-endpoint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Execute create-deployment composite action
+        uses: ./.github/actions/create-deployment
+        with:
+          deployment_file: ${{ inputs.deployment_file }}
+          deployment_name: ${{ inputs.deployment_name }}
+          resource_group: ${{ inputs.resource_group }}
+          workspace_name: ${{ inputs.aml_workspace }}
+          endpoint_name: ${{ inputs.endpoint_name }}
+          endpoint_type: $endpoint_type         
+          deployment_type: $deployment_type
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_subscription: ${{ secrets.AZURE_SUBSCRIPTION }}  
+          audience: ${{ env.audience }}
+          # creds: ${{ secrets.AZURE_CREDENTIALS }}
+  allocate_traffic:
+    runs-on: ubuntu-latest
+    needs: create-deployment
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2      
+      - name: Call Allocate Traffic Composite Action
+        uses: ./.github/actions/allocate-traffic
+        with:
+          endpoint_name: ${{ inputs.endpoint_name }}
+          resource_group: ${{ inputs.resource_group }}
+          workspace_name:  ${{ inputs.aml_workspace }}
+          deployment_name: ${{ inputs.deployment_name }}
+          traffic_allocation: "${{ inputs.deployment_name }}=${{ inputs.traffic_percentile }}"          
+          azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure_subscription: ${{ secrets.AZURE_SUBSCRIPTION }}  
+          audience: ${{ env.audience }}
+          # creds: ${{ secrets.AZURE_CREDENTIALS }}
+
