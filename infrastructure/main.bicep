@@ -37,7 +37,7 @@ module roleAssignmentModule 'modules/role_assignment.bicep' = {
 var baseName  = '${prefix}-${postfix}${env}'
 //var resourceGroupName = 'rg-${baseName}'
 var uamiName = 'uami-${baseName}'
-
+var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
 /*resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
   location: location
@@ -51,7 +51,7 @@ module st './modules/storage_account.bicep' = {
   name: 'st'
   scope: resourceGroup()
   params: {
-    baseName: 'st${uniqueString(resourceGroup().id)}${env}'
+    baseName: 'st${uniqueSuffix}${baseName}'
     location: location
     tags: tags
   }
@@ -62,7 +62,7 @@ module kv './modules/key_vault.bicep' = {
   name: 'kv'
   scope: resourceGroup()
   params: {
-    baseName: 'kv-${uniqueString(resourceGroup().id)}-${env}'
+    baseName: 'kv-${uniqueSuffix}-${baseName}'
     location: location
     tags: tags
   }
@@ -84,7 +84,7 @@ module cr './modules/container_registry.bicep' = {
   name: 'cr'
   scope: resourceGroup()
   params: {
-    baseName: 'cr${uniqueString(resourceGroup().id)}${env}'
+    baseName: 'cr${uniqueSuffix}${baseName}'
     location: location
     tags: tags
   }
@@ -95,7 +95,7 @@ module mlw './modules/aml_workspace.bicep' = {
   name: 'mlw'
   scope: resourceGroup()
   params: {
-    baseName: baseName
+    baseName: 'mlw-${uniqueSuffix}-${baseName}'
     location: location
     stoacctid: st.outputs.stoacctOut
     kvid: kv.outputs.kvOut
