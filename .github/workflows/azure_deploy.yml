@@ -19,13 +19,23 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # AZURE_CREDENTIALS is stored in GitHub Secrets
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+- name: Update and Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https lsb-release software-properties-common dirmngr
 
-    - name: Azure CLI Action
-      uses: azure/setup-cli@v3
+    - name: Add Microsoft GPG Key and Azure CLI repository
+      run: |
+        curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+        AZ_REPO=$(lsb_release -cs)
+        echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
+
+    - name: Install Azure CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y azure-cli
+
 
     - name: Verify Azure CLI installation
       run: az --version
