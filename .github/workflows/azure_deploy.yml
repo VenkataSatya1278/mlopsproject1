@@ -19,7 +19,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}  # AZURE_CREDENTIALS is stored in GitHub Secrets
 
-- name: Update and Install Dependencies
+    - name: Update and Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y apt-transport-https lsb-release software-properties-common dirmngr
