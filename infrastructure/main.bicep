@@ -51,7 +51,7 @@ module st './modules/storage_account.bicep' = {
   name: 'st'
   scope: resourceGroup()
   params: {
-    baseName: 'st${uniqueSuffix}${baseName}'
+    baseName: 'st${uniqueSuffix}${env}'
     location: location
     tags: tags
   }
@@ -84,7 +84,7 @@ module cr './modules/container_registry.bicep' = {
   name: 'cr'
   scope: resourceGroup()
   params: {
-    baseName: 'cr${uniqueSuffix}${baseName}'
+    baseName: 'cr${uniqueSuffix}${env}'
     location: location
     tags: tags
   }
