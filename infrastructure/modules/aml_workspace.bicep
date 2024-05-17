@@ -6,9 +6,10 @@ param appinsightid string
 param crid string
 param tags object
 
+
 // AML workspace
 resource amls 'Microsoft.MachineLearningServices/workspaces@2020-09-01-preview' = {
-  name: 'mlw-${baseName}'
+  name: baseName
   location: location
   identity: {
     type: 'SystemAssigned'
