@@ -58,9 +58,9 @@ module st './modules/storage_account.bicep' = {
 }
 
 // Key Vault
-/*module kv './modules/key_vault.bicep' = {
+module kv './modules/key_vault.bicep' = {
   name: 'kv'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
     baseName: baseName
     location: location
@@ -71,7 +71,7 @@ module st './modules/storage_account.bicep' = {
 // App Insights
 module appi './modules/application_insights.bicep' = {
   name: 'appi'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
     baseName: baseName
     location: location
@@ -82,9 +82,9 @@ module appi './modules/application_insights.bicep' = {
 // Container Registry
 module cr './modules/container_registry.bicep' = {
   name: 'cr'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
-    baseName: '${uniqueString(rg.id)}${env}'
+    baseName: 'cr${uniqueString(resourceGroup().id)}${env}'
     location: location
     tags: tags
   }
@@ -93,7 +93,7 @@ module cr './modules/container_registry.bicep' = {
 // AML workspace
 module mlw './modules/aml_workspace.bicep' = {
   name: 'mlw'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
     baseName: baseName
     location: location
@@ -108,9 +108,9 @@ module mlw './modules/aml_workspace.bicep' = {
 // AML compute cluster
 module mlwcc './modules/aml_computecluster.bicep' = {
   name: 'mlwcc'
-  scope: resourceGroup(rg.name)
+  scope: resourceGroup()
   params: {
     location: location
     workspaceName: mlw.outputs.amlsName
   }
-}*/
+}

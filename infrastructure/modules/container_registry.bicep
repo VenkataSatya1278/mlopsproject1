@@ -3,7 +3,7 @@ param location string
 param tags object
 
 resource cr 'Microsoft.ContainerRegistry/registries@2020-11-01-preview' = {
-  name: 'cr${baseName}'
+  name: baseName
   location: location
   sku: {
     name: 'Standard'
