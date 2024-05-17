@@ -4,7 +4,7 @@ param tags object
 
 // Key Vault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: 'kv-${baseName}'
+  name: baseName
   location: location
   properties: {
     tenantId: subscription().tenantId
