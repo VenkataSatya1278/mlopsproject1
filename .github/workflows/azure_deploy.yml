@@ -47,6 +47,6 @@ jobs:
         # Deploy the Bicep template
         az deployment group create \
           --resource-group "example-rg" \
-          --template-file "\infrastructure\main.bicep" \
-          --parameters "\infrastructure\param.json"
+          --template-file infrastructure\main.bicep \
+          --parameters infrastructure\param.json
 
