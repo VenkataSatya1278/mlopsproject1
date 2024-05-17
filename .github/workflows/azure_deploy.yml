@@ -24,12 +24,8 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Install Azure CLI
-      run: |
-        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
     - name: Azure CLI Action
-      uses: azure/CLI@v1
+      uses: azure/setup-cli@v3
 
     - name: Verify Azure CLI installation
       run: az --version
