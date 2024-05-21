@@ -37,7 +37,7 @@ module roleAssignmentModule 'modules/role_assignment.bicep' = {
 var baseName  = '${prefix}-${postfix}${env}'
 //var resourceGroupName = 'rg-${baseName}'
 var uamiName = 'uami-${baseName}'
-var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 4)
+var uniqueSuffix = substring(uniqueString(resourceGroup().id), 0, 3)
 /*resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
   location: location
