@@ -39,6 +39,12 @@ jobs:
 
     - name: Verify Azure CLI installation
       run: az --version
+    
+    - name: Read variables from YAML
+      id: vars
+      uses: actions/read-yaml@v1
+      with:
+        path: infrastructure/variables.yml
 
     - name: Deploy Bicep Template
       run: |
@@ -46,7 +52,7 @@ jobs:
         az upgrade --yes
         # Deploy the Bicep template
         az deployment group create \
-          --resource-group "example-rg" \
+          --resource-group "${{ steps.vars.outputs.resource_group }}" \
           --template-file infrastructure/main.bicep \
           --parameters infrastructure/param.json
 
