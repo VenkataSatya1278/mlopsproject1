@@ -40,19 +40,23 @@ jobs:
     - name: Verify Azure CLI installation
       run: az --version
     
-    - name: Read variables from YAML
-      id: vars
-      uses: actions/read-yaml@v1
+    - name: Read YAML file
+      id: read-yaml
+      uses: mikefarah/yq-action@v1
       with:
-        path: infrastructure/variables.yml
+        cmd: cat infrastructure/variables.yml
 
+    - name: Set environment variables
+      run: |
+        echo "RESOURCE_GROUP=$(echo '${{ steps.read-yaml.outputs.result }}' | yq eval '.resource_group' -)" >> $GITHUB_ENV
+        
     - name: Deploy Bicep Template
       run: |
         # Ensure Azure CLI is up to date
         az upgrade --yes
         # Deploy the Bicep template
         az deployment group create \
-          --resource-group "${{ steps.vars.outputs.resource_group }}" \
+          --resource-group "${{ env.RESOURCE_GROUP }}" \
           --template-file infrastructure/main.bicep \
           --parameters infrastructure/param.json
 
