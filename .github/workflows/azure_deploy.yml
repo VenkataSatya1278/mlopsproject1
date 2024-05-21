@@ -40,15 +40,19 @@ jobs:
     - name: Verify Azure CLI installation
       run: az --version
     
-    - name: Read YAML file
-      id: read-yaml
-      uses: mikefarah/yq-action@v1
-      with:
-        cmd: cat infrastructure/variables.yml
-
-    - name: Set environment variables
+    - name: Install yq
       run: |
-        echo "RESOURCE_GROUP=$(echo '${{ steps.read-yaml.outputs.result }}' | yq eval '.resource_group' -)" >> $GITHUB_ENV
+        wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq
+        chmod +x /usr/bin/yq
+
+    - name: Read YAML variables and set environment variables
+      id: read-yaml
+      run: |
+        RESOURCE_GROUP=$(yq eval '.resource_group' infrastructure/variables.yml)
+        
+
+        echo "RESOURCE_GROUP=$RESOURCE_GROUP" >> $GITHUB_ENV
+        
         
     - name: Deploy Bicep Template
       run: |
